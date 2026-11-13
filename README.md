@@ -4,7 +4,7 @@ WordPress block plugin that adds a **3D Text** option to the Gutenberg Transform
 
 ## Status
 
-Version `0.2.0` adds Three.js (`0.187`) extruded text: edit vs preview in the block toolbar, and the same scene on the front end via `viewScript`.
+Version `0.4.0` adds editor-side WebP caching, look presets, and heading mappings with one-post precache, on top of Three.js (`0.187`) extruded text (edit / preview and front-end `viewScript`).
 
 ## Requirements
 

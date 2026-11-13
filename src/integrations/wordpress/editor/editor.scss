@@ -30,6 +30,31 @@
 	margin-right: auto !important;
 }
 
+.os3dt-presets-list {
+	list-style: none;
+	margin: 16px 0 0;
+	padding: 0;
+
+	&__item {
+		margin-bottom: 12px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid #dcdcde;
+
+		img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+			margin-bottom: 8px;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 4px;
+	}
+}
+
 .os3dt-resettable-control {
 	margin-bottom: 16px;
 

@@ -5,6 +5,7 @@ import Edit from './integrations/wordpress/editor/edit';
 import save from './integrations/wordpress/save/save';
 import icon from './integrations/wordpress/block/icon';
 import transforms from './integrations/wordpress/block/transforms';
+import deprecated from './integrations/wordpress/block/deprecated';
 import './integrations/wordpress/style.scss';
 
 registerBlockType( metadata.name, {
@@ -12,4 +13,5 @@ registerBlockType( metadata.name, {
 	edit: Edit,
 	save,
 	transforms,
+	deprecated,
 } );

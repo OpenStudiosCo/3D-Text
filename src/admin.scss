@@ -1,0 +1,44 @@
+.os3dt-admin {
+	max-width: 960px;
+
+	section {
+		margin: 24px 0;
+		padding: 16px 0;
+		border-top: 1px solid #dcdcde;
+	}
+
+	&__row {
+		display: grid;
+		grid-template-columns: repeat( auto-fit, minmax( 160px, 1fr ) );
+		gap: 12px;
+		align-items: end;
+		margin-bottom: 16px;
+		padding: 12px;
+		background: #f6f7f7;
+	}
+}
+
+.os3dt-presets-list {
+	list-style: none;
+	margin: 16px 0 0;
+	padding: 0;
+
+	&__item {
+		margin-bottom: 12px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid #dcdcde;
+
+		img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+			margin-bottom: 8px;
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 8px;
+		margin-top: 4px;
+	}
+}

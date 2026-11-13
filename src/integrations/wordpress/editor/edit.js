@@ -1,15 +1,18 @@
 import { __ } from '@wordpress/i18n';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useCallback } from '@wordpress/element';
 import {
 	useBlockProps,
 	RichText,
 	BlockControls,
 } from '@wordpress/block-editor';
 import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import Preview from './preview';
 import Inspector from './inspector';
 import TagToolbar from './tag-toolbar';
 import { contentTag } from '../../../type/content-tag';
+import { clearedCacheAttributes } from '../../../type/cache-key';
+import { generateAndUpload } from './cache-client';
 import './editor.scss';
 
 const editIcon = (
@@ -25,6 +28,19 @@ const previewIcon = (
 );
 
 /**
+ * Clear stored image reference whenever text or look/placement changes.
+ *
+ * @param {Object} patch Attribute patch.
+ * @return {Object}
+ */
+function withClearedCache( patch ) {
+	return {
+		...patch,
+		...clearedCacheAttributes(),
+	};
+}
+
+/**
  * Editor: text mode keeps RichText; preview mode swaps in the Three.js canvas.
  *
  * @param {Object}   props
@@ -33,27 +49,102 @@ const previewIcon = (
  * @return {JSX.Element}
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { content, level } = attributes;
+	const { content, level, cacheHash } = attributes;
 	const [ mode, setMode ] = useState( 'preview' );
+	const [ generating, setGenerating ] = useState( false );
+	const [ generateError, setGenerateError ] = useState( '' );
 	const measureRef = useRef( null );
+	const previewRef = useRef( null );
 	const tagName = contentTag( level );
+	const postId = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
+		return editor?.getCurrentPostId?.() || 0;
+	}, [] );
+
 	const blockProps = useBlockProps( {
 		className:
 			'wp-block-openstudios-three-d-text is-' +
-			( mode === 'preview' ? 'preview' : 'edit' ),
+			( mode === 'preview' ? 'preview' : 'edit' ) +
+			( cacheHash ? ' is-cached' : '' ),
 	} );
+
+	const updateAttributes = useCallback(
+		( patch ) => {
+			const keys = Object.keys( patch || {} );
+			const metaOnly =
+				keys.length > 0 &&
+				keys.every( ( key ) =>
+					[ 'cacheHash', 'cacheWidth', 'cacheHeight', 'presetId' ].includes(
+						key
+					)
+				);
+			setAttributes( metaOnly ? patch : withClearedCache( patch ) );
+		},
+		[ setAttributes ]
+	);
+
+	const onContentChange = useCallback(
+		( next ) => {
+			updateAttributes( { content: next } );
+		},
+		[ updateAttributes ]
+	);
+
+	const onGenerate = useCallback( async () => {
+		setGenerateError( '' );
+		setGenerating( true );
+		try {
+			if ( mode !== 'preview' ) {
+				setMode( 'preview' );
+			}
+			const scene = await previewRef.current?.whenReady?.();
+			if ( ! scene ) {
+				throw Object.assign( new Error( 'Preview is not ready.' ), {
+					code: 'encode_failed',
+				} );
+			}
+			const next = await generateAndUpload( scene, attributes, postId );
+			setAttributes( next );
+		} catch ( err ) {
+			const code = err?.code || err?.data?.code || '';
+			if ( code === 'webp_unsupported' ) {
+				setGenerateError(
+					__(
+						'This browser could not encode WebP. Keep using live 3D preview.',
+						'openstudios-3d-text'
+					)
+				);
+			} else {
+				setGenerateError(
+					err?.message ||
+						__(
+							'Could not generate WebP cache.',
+							'openstudios-3d-text'
+						)
+				);
+			}
+		} finally {
+			setGenerating( false );
+		}
+	}, [ attributes, mode, postId, setAttributes ] );
 
 	return (
 		<>
 			<Inspector
 				attributes={ attributes }
-				setAttributes={ setAttributes }
+				setAttributes={ updateAttributes }
+				onGenerate={ onGenerate }
+				generating={ generating }
+				generateError={ generateError }
+				previewRef={ previewRef }
+				measureRef={ measureRef }
+				postId={ postId }
 			/>
 			<BlockControls group="block">
 				<TagToolbar
 					level={ level }
 					onChange={ ( nextLevel ) =>
-						setAttributes( { level: nextLevel } )
+						updateAttributes( { level: nextLevel } )
 					}
 				/>
 			</BlockControls>
@@ -86,9 +177,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						tagName={ tagName }
 						className="wp-block-openstudios-three-d-text__content"
 						value={ content }
-						onChange={ ( next ) =>
-							setAttributes( { content: next } )
-						}
+						onChange={ onContentChange }
 						placeholder={ __(
 							'3D Text…',
 							'openstudios-3d-text'
@@ -104,6 +193,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				</div>
 				{ mode === 'preview' && (
 					<Preview
+						ref={ previewRef }
 						html={ content }
 						attributes={ attributes }
 						measureRef={ measureRef }

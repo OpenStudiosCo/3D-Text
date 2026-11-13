@@ -8,9 +8,12 @@ import {
 	RangeControl,
 	SelectControl,
 	ToggleControl,
+	Button,
+	Notice,
 } from '@wordpress/components';
 import { DEFAULT_SETTINGS } from '../../../type/settings';
 import ResettableControl from './resettable-control';
+import PresetsPanel from './presets-panel';
 
 const DEFAULT_LEVEL = 0;
 
@@ -20,9 +23,24 @@ const DEFAULT_LEVEL = 0;
  * @param {Object}   props
  * @param {Object}   props.attributes
  * @param {Function} props.setAttributes
+ * @param {Function} [props.onGenerate]
+ * @param {boolean}  [props.generating]
+ * @param {string}   [props.generateError]
+ * @param {Object}   [props.previewRef]
+ * @param {Object}   [props.measureRef]
+ * @param {number}   [props.postId]
  * @return {JSX.Element}
  */
-export default function Inspector( { attributes, setAttributes } ) {
+export default function Inspector( {
+	attributes,
+	setAttributes,
+	onGenerate,
+	generating = false,
+	generateError = '',
+	previewRef,
+	measureRef,
+	postId = 0,
+} ) {
 	const {
 		level,
 		rotateX,
@@ -37,10 +55,56 @@ export default function Inspector( { attributes, setAttributes } ) {
 		fontWeight,
 		textColor,
 		shiny,
+		cacheHash,
 	} = attributes;
+
+	const cacheStatus = cacheHash
+		? __(
+				'WebP ready — Save/Update the post to publish it.',
+				'openstudios-3d-text'
+		  )
+		: __(
+				'No cached image. Front end will use live 3D.',
+				'openstudios-3d-text'
+		  );
 
 	return (
 		<InspectorControls>
+			<PanelBody
+				title={ __( 'Cached image', 'openstudios-3d-text' ) }
+				initialOpen={ true }
+			>
+				<p>{ cacheStatus }</p>
+				{ cacheHash ? (
+					<p>
+						<code>{ cacheHash.slice( 0, 12 ) }…</code>
+					</p>
+				) : null }
+				{ generateError ? (
+					<Notice status="error" isDismissible={ false }>
+						{ generateError }
+					</Notice>
+				) : null }
+				<Button
+					variant="primary"
+					onClick={ onGenerate }
+					disabled={ generating || ! onGenerate }
+					isBusy={ generating }
+				>
+					{ generating
+						? __( 'Generating…', 'openstudios-3d-text' )
+						: __( 'Generate WebP', 'openstudios-3d-text' ) }
+				</Button>
+			</PanelBody>
+
+			<PresetsPanel
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+				previewRef={ previewRef }
+				measureRef={ measureRef }
+				postId={ postId }
+			/>
+
 			<PanelBody
 				title={ __( 'Content', 'openstudios-3d-text' ) }
 				initialOpen={ true }

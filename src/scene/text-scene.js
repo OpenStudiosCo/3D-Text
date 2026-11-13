@@ -92,6 +92,7 @@ export class TextScene {
 			antialias: true,
 			alpha: true,
 			premultipliedAlpha: false,
+			preserveDrawingBuffer: true,
 		} );
 		this.#renderer.setClearColor( 0x000000, 0 );
 		this.#renderer.setPixelRatio(
@@ -114,7 +115,7 @@ export class TextScene {
 		this.#rebuildGeometry();
 
 		this.#resizeObserver = new ResizeObserver( () => {
-			this.#fitToText();
+			this.#fitToText( { constrainToColumn: true } );
 			this.#paint();
 		} );
 		const column =
@@ -158,7 +159,103 @@ export class TextScene {
 
 		this.#applyPose();
 		this.#applyAppearance();
-		this.#fitToText();
+		this.#fitToText( { constrainToColumn: true } );
+		this.#paint();
+	}
+
+	/**
+	 * Resolved type metrics used for extrusion and cache keys.
+	 *
+	 * @return {{ fontSize: number, color: string }}
+	 */
+	getTypeMetrics() {
+		return {
+			fontSize: this.#type.fontSize,
+			color: this.#settings.textColor || this.#type.color,
+		};
+	}
+
+	/**
+	 * Paint at natural glyph bounds (no column constraint) and encode WebP.
+	 *
+	 * @param {{ pixelRatio?: number, quality?: number }} [options]
+	 * @return {Promise<{ blob: Blob, width: number, height: number, pixelRatio: number }>}
+	 */
+	async captureFrame( { pixelRatio = 2, quality = 0.92 } = {} ) {
+		if ( this.#disposed || ! this.#mesh ) {
+			const err = new Error( 'Scene is not ready to capture.' );
+			err.code = 'encode_failed';
+			throw err;
+		}
+
+		const dpr = Math.min(
+			Math.max( Number( pixelRatio ) || 2, 0.5 ),
+			Math.min( window.devicePixelRatio || 1, 2 )
+		);
+
+		const natural = this.#fitToText( { constrainToColumn: false } );
+		if ( ! natural ) {
+			const err = new Error( 'Could not size the capture frame.' );
+			err.code = 'encode_failed';
+			throw err;
+		}
+
+		let { width, height } = natural;
+		const longest = Math.max( width, height ) * dpr;
+		let captureDpr = dpr;
+		if ( longest > 4096 ) {
+			captureDpr = ( 4096 / Math.max( width, height ) );
+		}
+
+		this.#renderer.setPixelRatio( captureDpr );
+		this.#renderer.setSize( width, height, false );
+		this.#paint();
+
+		const canvas = this.#renderer.domElement;
+		let blob;
+		try {
+			blob = await new Promise( ( resolve ) => {
+				canvas.toBlob( resolve, 'image/webp', quality );
+			} );
+		} catch ( cause ) {
+			this.#restoreLiveFit();
+			const err = new Error( 'WebP encoding failed.' );
+			err.code = 'encode_failed';
+			err.cause = cause;
+			throw err;
+		}
+
+		this.#restoreLiveFit();
+
+		if ( ! blob || blob.size === 0 ) {
+			const err = new Error(
+				'This browser could not encode a WebP image.'
+			);
+			err.code = 'webp_unsupported';
+			throw err;
+		}
+
+		if ( blob.type && blob.type !== 'image/webp' ) {
+			const err = new Error(
+				'Encoder returned a non-WebP image type.'
+			);
+			err.code = 'webp_unsupported';
+			throw err;
+		}
+
+		return {
+			blob,
+			width,
+			height,
+			pixelRatio: captureDpr,
+		};
+	}
+
+	#restoreLiveFit() {
+		this.#renderer.setPixelRatio(
+			Math.min( window.devicePixelRatio || 1, 2 )
+		);
+		this.#fitToText( { constrainToColumn: true } );
 		this.#paint();
 	}
 
@@ -210,11 +307,14 @@ export class TextScene {
 	}
 
 	/**
-	 * Size the canvas from the posed bounds. Only shrink if wider than the content column.
+	 * Size the canvas from the posed bounds.
+	 *
+	 * @param {{ constrainToColumn?: boolean }} [options]
+	 * @return {{ width: number, height: number }|null}
 	 */
-	#fitToText() {
+	#fitToText( { constrainToColumn = true } = {} ) {
 		if ( ! this.#mesh ) {
-			return;
+			return null;
 		}
 
 		const baseScale = this.#mesh.userData.baseScale || 1;
@@ -226,12 +326,14 @@ export class TextScene {
 		let w = Math.max( Math.ceil( size.x * FRAME_MARGIN ), 1 );
 		let h = Math.max( Math.ceil( size.y * FRAME_MARGIN ), 1 );
 
-		const maxW = getColumnMaxWidth( this.#container );
-		if ( maxW > 0 && w > maxW ) {
-			const s = maxW / w;
-			w = maxW;
-			h = Math.max( Math.ceil( h * s ), 1 );
-			this.#mesh.scale.setScalar( baseScale * s );
+		if ( constrainToColumn ) {
+			const maxW = getColumnMaxWidth( this.#container );
+			if ( maxW > 0 && w > maxW ) {
+				const s = maxW / w;
+				w = maxW;
+				h = Math.max( Math.ceil( h * s ), 1 );
+				this.#mesh.scale.setScalar( baseScale * s );
+			}
 		}
 
 		this.#container.style.width = `${ w }px`;
@@ -244,6 +346,8 @@ export class TextScene {
 		this.#camera.bottom = -h / 2;
 		this.#camera.updateProjectionMatrix();
 		this.#camera.lookAt( 0, 0, 0 );
+
+		return { width: w, height: h };
 	}
 
 	#rebuildGeometry() {
@@ -292,7 +396,7 @@ export class TextScene {
 		this.#root.add( this.#mesh );
 
 		this.#applyPose();
-		this.#fitToText();
+		this.#fitToText( { constrainToColumn: true } );
 		this.#paint();
 	}
 }

@@ -14,15 +14,32 @@ import {
  * @return {JSX.Element}
  */
 export default function save( { attributes } ) {
-	const { content, level } = attributes;
+	const {
+		content,
+		level,
+		cacheHash,
+		cacheWidth,
+		cacheHeight,
+		presetId,
+	} = attributes;
 	const Tag = contentTag( level );
 	const plain = toPlainText( content );
 	const settings = settingsFromAttributes( attributes );
+	const cacheAttrs = {};
+	if ( cacheHash ) {
+		cacheAttrs[ 'data-os3dt-cache' ] = cacheHash;
+		cacheAttrs[ 'data-os3dt-cache-w' ] = String( cacheWidth || 0 );
+		cacheAttrs[ 'data-os3dt-cache-h' ] = String( cacheHeight || 0 );
+	}
+	if ( presetId ) {
+		cacheAttrs[ 'data-os3dt-preset' ] = presetId;
+	}
 	const blockProps = useBlockProps.save( {
 		className: 'wp-block-openstudios-three-d-text',
 		'data-os3dt-text': plain,
 		'data-os3dt-level': String( level || 0 ),
 		...settingsToDataset( settings ),
+		...cacheAttrs,
 	} );
 
 	return (

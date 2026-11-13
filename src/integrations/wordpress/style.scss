@@ -20,25 +20,65 @@
 		}
 	}
 
+	&__image {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		pointer-events: none;
+		background: transparent;
+	}
+
 	&.is-preview {
 		.wp-block-openstudios-three-d-text__content {
-			position: absolute;
+			position: absolute !important;
 			left: 0;
 			top: 0;
-			opacity: 0;
+			opacity: 0 !important;
 			pointer-events: none;
 			white-space: nowrap;
 			z-index: -1;
 			width: auto;
 			height: auto;
-			margin: 0;
-			clip: auto;
+			margin: 0 !important;
 			overflow: visible;
 		}
 
 		.wp-block-openstudios-three-d-text__canvas {
 			display: block;
 		}
+	}
+
+	&.is-cached.is-preview {
+		.wp-block-openstudios-three-d-text__content {
+			pointer-events: auto;
+		}
+
+		.wp-block-openstudios-three-d-text__image {
+			display: block !important;
+		}
+	}
+}
+
+.os3dt-mapped {
+	position: relative;
+	display: block;
+	width: fit-content;
+	max-width: 100%;
+
+	&__text {
+		position: absolute;
+		left: 0;
+		top: 0;
+		opacity: 0;
+		z-index: -1;
+		pointer-events: auto;
+	}
+
+	&__image {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		pointer-events: none;
 	}
 }
 

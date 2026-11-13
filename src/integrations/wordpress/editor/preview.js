@@ -1,4 +1,9 @@
-import { useEffect, useRef } from '@wordpress/element';
+import {
+	useEffect,
+	useRef,
+	useImperativeHandle,
+	forwardRef,
+} from '@wordpress/element';
 import { TextScene } from '../../../scene/text-scene';
 import { resolveFontUrl } from '../../../type/fonts';
 import { settingsFromAttributes } from '../../../type/settings';
@@ -27,9 +32,10 @@ function resolveReference( measureRef ) {
  * @param {string} props.html
  * @param {Object} props.attributes
  * @param {import('react').RefObject<HTMLElement|null>} props.measureRef
+ * @param {import('react').Ref} ref
  * @return {JSX.Element}
  */
-export default function Preview( { html, attributes, measureRef } ) {
+function Preview( { html, attributes, measureRef }, ref ) {
 	const hostRef = useRef( null );
 	const sceneRef = useRef( null );
 	const htmlRef = useRef( html );
@@ -42,6 +48,34 @@ export default function Preview( { html, attributes, measureRef } ) {
 		settings.fontFamily,
 		settings.fontWeight
 	);
+
+	useImperativeHandle( ref, () => ( {
+		/**
+		 * @return {import('../../../scene/text-scene').TextScene|null}
+		 */
+		getScene: () => sceneRef.current,
+		/**
+		 * Wait until the scene is mounted.
+		 *
+		 * @return {Promise<import('../../../scene/text-scene').TextScene>}
+		 */
+		whenReady: () =>
+			new Promise( ( resolve, reject ) => {
+				let frames = 0;
+				const tick = () => {
+					if ( sceneRef.current ) {
+						resolve( sceneRef.current );
+						return;
+					}
+					if ( frames++ > 120 ) {
+						reject( new Error( 'Preview scene is not ready.' ) );
+						return;
+					}
+					requestAnimationFrame( tick );
+				};
+				tick();
+			} ),
+	} ) );
 
 	useEffect( () => {
 		const host = hostRef.current;
@@ -71,7 +105,6 @@ export default function Preview( { html, attributes, measureRef } ) {
 					return;
 				}
 				sceneRef.current = scene;
-				// Apply whatever the sidebar has now (mount is async).
 				const latest = settingsFromAttributes( attributesRef.current );
 				scene.setSettings(
 					latest,
@@ -91,7 +124,6 @@ export default function Preview( { html, attributes, measureRef } ) {
 			}
 		};
 		// Remount when the HTML element changes so inherited type metrics refresh.
-		// Other settings flow through setSettings below.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ measureRef, attributes.level ] );
 
@@ -118,3 +150,5 @@ export default function Preview( { html, attributes, measureRef } ) {
 		/>
 	);
 }
+
+export default forwardRef( Preview );

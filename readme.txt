@@ -4,7 +4,7 @@ Contributors: openstudios
 Tags: 3d, text, gutenberg, block, editor
 Requires at least: 6.5
 Tested up to: 7.0
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -51,6 +51,11 @@ Paragraph and Heading.
 
 == Changelog ==
 
+= 0.4.0 =
+* Generate WebP cache for 3D Text blocks (plugin-owned storage, no Media Library)
+* Save as preset with Sample text thumbnails
+* Admin mappings for core/heading level ± class with one-post precache
+
 = 0.3.0 =
 * Sidebar controls for rotation, offset, extrusion, typeface, colour and shininess
 * Canvas refits when posed bounds change
@@ -63,6 +68,9 @@ Paragraph and Heading.
 * Initial scaffold: plugin shell and 3D Text block with Transform To support
 
 == Upgrade Notice ==
+
+= 0.4.0 =
+Adds WebP caching, look presets and heading mappings.
 
 = 0.3.0 =
 Adds inspector controls for 3D pose, typeface and appearance.
