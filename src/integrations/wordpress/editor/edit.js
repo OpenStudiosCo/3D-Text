@@ -34,7 +34,7 @@ const previewIcon = (
  */
 export default function Edit( { attributes, setAttributes } ) {
 	const { content, level } = attributes;
-	const [ mode, setMode ] = useState( 'edit' );
+	const [ mode, setMode ] = useState( 'preview' );
 	const measureRef = useRef( null );
 	const tagName = contentTag( level );
 	const blockProps = useBlockProps( {
