@@ -45,6 +45,10 @@
       "type": "number",
       "default": 0
     },
+    "sizeScale": {
+      "type": "number",
+      "default": 1
+    },
     "depth": {
       "type": "number",
       "default": 0.08

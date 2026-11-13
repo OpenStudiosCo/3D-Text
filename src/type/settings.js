@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS = {
 	rotateZ: 0,
 	offsetX: 0,
 	offsetY: 0,
+	sizeScale: 1,
 	depth: 0.08,
 	bevel: 0,
 	fontFamily: 'helvetiker',
@@ -29,6 +30,9 @@ export function settingsFromAttributes( attributes ) {
 		rotateZ: Number( attributes.rotateZ ?? DEFAULT_SETTINGS.rotateZ ),
 		offsetX: Number( attributes.offsetX ?? DEFAULT_SETTINGS.offsetX ),
 		offsetY: Number( attributes.offsetY ?? DEFAULT_SETTINGS.offsetY ),
+		sizeScale: Number(
+			attributes.sizeScale ?? DEFAULT_SETTINGS.sizeScale
+		),
 		depth: Number( attributes.depth ?? DEFAULT_SETTINGS.depth ),
 		bevel: Number( attributes.bevel ?? DEFAULT_SETTINGS.bevel ),
 		fontFamily: attributes.fontFamily || DEFAULT_SETTINGS.fontFamily,
@@ -51,6 +55,7 @@ export function settingsToDataset( settings ) {
 		'data-os3dt-rotate-z': String( settings.rotateZ ),
 		'data-os3dt-offset-x': String( settings.offsetX ),
 		'data-os3dt-offset-y': String( settings.offsetY ),
+		'data-os3dt-size-scale': String( settings.sizeScale ),
 		'data-os3dt-depth': String( settings.depth ),
 		'data-os3dt-bevel': String( settings.bevel ),
 		'data-os3dt-font-family': settings.fontFamily,
@@ -82,6 +87,10 @@ export function settingsFromDataset( el ) {
 		rotateZ: num( 'data-os3dt-rotate-z', DEFAULT_SETTINGS.rotateZ ),
 		offsetX: num( 'data-os3dt-offset-x', DEFAULT_SETTINGS.offsetX ),
 		offsetY: num( 'data-os3dt-offset-y', DEFAULT_SETTINGS.offsetY ),
+		sizeScale: num(
+			'data-os3dt-size-scale',
+			DEFAULT_SETTINGS.sizeScale
+		),
 		depth: num( 'data-os3dt-depth', DEFAULT_SETTINGS.depth ),
 		bevel: num( 'data-os3dt-bevel', DEFAULT_SETTINGS.bevel ),
 		fontFamily:
@@ -106,6 +115,7 @@ export function needsGeometryRebuild( a, b ) {
 	return (
 		a.depth !== b.depth ||
 		a.bevel !== b.bevel ||
+		a.sizeScale !== b.sizeScale ||
 		a.fontFamily !== b.fontFamily ||
 		a.fontWeight !== b.fontWeight
 	);

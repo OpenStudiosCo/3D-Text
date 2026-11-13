@@ -90,9 +90,10 @@ export default function Preview( { html, attributes, measureRef } ) {
 				sceneRef.current = null;
 			}
 		};
-		// Mount once per preview session; settings flow through setSettings below.
+		// Remount when the HTML element changes so inherited type metrics refresh.
+		// Other settings flow through setSettings below.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ measureRef ] );
+	}, [ measureRef, attributes.level ] );
 
 	useEffect( () => {
 		if ( sceneRef.current ) {

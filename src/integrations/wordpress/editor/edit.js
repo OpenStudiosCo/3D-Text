@@ -8,6 +8,7 @@ import {
 import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
 import Preview from './preview';
 import Inspector from './inspector';
+import TagToolbar from './tag-toolbar';
 import { contentTag } from '../../../type/content-tag';
 import './editor.scss';
 
@@ -48,6 +49,14 @@ export default function Edit( { attributes, setAttributes } ) {
 				attributes={ attributes }
 				setAttributes={ setAttributes }
 			/>
+			<BlockControls group="block">
+				<TagToolbar
+					level={ level }
+					onChange={ ( nextLevel ) =>
+						setAttributes( { level: nextLevel } )
+					}
+				/>
+			</BlockControls>
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton

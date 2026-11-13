@@ -256,15 +256,17 @@ export class TextScene {
 			this.#mesh = null;
 		}
 
-		const depth = Math.max( this.#type.fontSize * this.#settings.depth, 0.5 );
+		const scale = Math.max( this.#settings.sizeScale || 1, 0.1 );
+		const glyphSize = this.#type.fontSize * scale;
+		const depth = Math.max( glyphSize * this.#settings.depth, 0.5 );
 		const bevelEnabled = this.#settings.bevel > 0;
 		const bevelSize = bevelEnabled
-			? Math.max( this.#type.fontSize * this.#settings.bevel, 0.15 )
+			? Math.max( glyphSize * this.#settings.bevel, 0.15 )
 			: 0;
 
 		const geometry = new TextGeometry( text, {
 			font: this.#font,
-			size: this.#type.fontSize,
+			size: glyphSize,
 			depth,
 			curveSegments: 6,
 			bevelEnabled,

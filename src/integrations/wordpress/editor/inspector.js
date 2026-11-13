@@ -20,11 +20,13 @@ import {
  */
 export default function Inspector( { attributes, setAttributes } ) {
 	const {
+		level,
 		rotateX,
 		rotateY,
 		rotateZ,
 		offsetX,
 		offsetY,
+		sizeScale,
 		depth,
 		bevel,
 		fontFamily,
@@ -36,9 +38,74 @@ export default function Inspector( { attributes, setAttributes } ) {
 	return (
 		<InspectorControls>
 			<PanelBody
+				title={ __( 'Content', 'openstudios-3d-text' ) }
+				initialOpen={ true }
+			>
+				<SelectControl
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					label={ __( 'HTML element', 'openstudios-3d-text' ) }
+					help={ __(
+						'Semantic tag used for the editable text and inherited type size.',
+						'openstudios-3d-text'
+					) }
+					value={ String( level ?? 0 ) }
+					options={ [
+						{
+							label: __( 'Paragraph', 'openstudios-3d-text' ),
+							value: '0',
+						},
+						{
+							label: __( 'Heading 1', 'openstudios-3d-text' ),
+							value: '1',
+						},
+						{
+							label: __( 'Heading 2', 'openstudios-3d-text' ),
+							value: '2',
+						},
+						{
+							label: __( 'Heading 3', 'openstudios-3d-text' ),
+							value: '3',
+						},
+						{
+							label: __( 'Heading 4', 'openstudios-3d-text' ),
+							value: '4',
+						},
+						{
+							label: __( 'Heading 5', 'openstudios-3d-text' ),
+							value: '5',
+						},
+						{
+							label: __( 'Heading 6', 'openstudios-3d-text' ),
+							value: '6',
+						},
+					] }
+					onChange={ ( value ) =>
+						setAttributes( { level: Number( value ) } )
+					}
+				/>
+			</PanelBody>
+
+			<PanelBody
 				title={ __( 'Transform', 'openstudios-3d-text' ) }
 				initialOpen={ true }
 			>
+				<RangeControl
+					__nextHasNoMarginBottom
+					__next40pxDefaultSize
+					label={ __( 'Size', 'openstudios-3d-text' ) }
+					help={ __(
+						'Scale relative to the inherited font size of the HTML element.',
+						'openstudios-3d-text'
+					) }
+					value={ sizeScale }
+					onChange={ ( value ) =>
+						setAttributes( { sizeScale: value ?? 1 } )
+					}
+					min={ 0.5 }
+					max={ 3 }
+					step={ 0.05 }
+				/>
 				<RangeControl
 					__nextHasNoMarginBottom
 					__next40pxDefaultSize
