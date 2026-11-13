@@ -1,0 +1,37 @@
+# Copyright (C) 2026 Open Studios
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Open Studios 3D Text 0.1.0\n"
+"Report-Msgid-Bugs-To: https://openstudios.xyz\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-03-13T00:00:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: Manual\n"
+"X-Domain: openstudios-3d-text\n"
+
+#. Plugin Name of the plugin
+msgid "Open Studios 3D Text"
+msgstr ""
+
+#. Description of the plugin
+msgid "Turn selected text into a 3D Text block in the WordPress block editor."
+msgstr ""
+
+#: src/block.json
+msgctxt "block title"
+msgid "3D Text"
+msgstr ""
+
+#: src/block.json
+msgctxt "block description"
+msgid "Display text with a 3D effect."
+msgstr ""
+
+#: src/edit.js
+msgid "3D Text…"
+msgstr ""
