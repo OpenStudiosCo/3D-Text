@@ -1,3 +1,60 @@
 .wp-block-openstudios-three-d-text {
-	/* Front-end hook for future 3D presentation layers. */
+	position: relative;
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: 100%;
+	margin-left: 0;
+	margin-right: auto;
+
+	&__canvas {
+		display: none;
+		width: fit-content;
+		max-width: 100%;
+		line-height: 0;
+		background: transparent;
+		overflow: visible;
+
+		canvas {
+			display: block;
+			background: transparent;
+		}
+	}
+
+	&.is-preview {
+		.wp-block-openstudios-three-d-text__content {
+			position: absolute;
+			left: 0;
+			top: 0;
+			opacity: 0;
+			pointer-events: none;
+			white-space: nowrap;
+			z-index: -1;
+			width: auto;
+			height: auto;
+			margin: 0;
+			clip: auto;
+			overflow: visible;
+		}
+
+		.wp-block-openstudios-three-d-text__canvas {
+			display: block;
+		}
+	}
+}
+
+/* Match editor: top-level blocks line up with the content column start. */
+.entry-content > .wp-block-openstudios-three-d-text,
+.wp-block-post-content > .wp-block-openstudios-three-d-text {
+	max-width: min( 100%, var( --wp--style--global--content-size, 840px ) );
+	margin-left: max(
+		0px,
+		calc(
+			(
+					100% -
+						min( 100%, var( --wp--style--global--content-size, 840px ) )
+				) /
+				2
+		)
+	);
+	margin-right: auto;
 }

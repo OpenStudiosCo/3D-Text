@@ -1,8 +1,1 @@
-/*!***************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/style.scss ***!
-  \***************************************************************************************************************************************************************************************************************************************/
-.wp-block-openstudios-three-d-text {
-  /* Front-end hook for future 3D presentation layers. */
-}
-
-/*# sourceMappingURL=style-index.css.map*/
+.wp-block-openstudios-three-d-text{box-sizing:border-box;margin-left:0;margin-right:auto;max-width:100%;position:relative;width:fit-content}.wp-block-openstudios-three-d-text__canvas{background:transparent;display:none;line-height:0;max-width:100%;overflow:visible;width:fit-content}.wp-block-openstudios-three-d-text__canvas canvas{background:transparent;display:block}.wp-block-openstudios-three-d-text.is-preview .wp-block-openstudios-three-d-text__content{height:auto;left:0;margin:0;opacity:0;pointer-events:none;position:absolute;top:0;white-space:nowrap;width:auto;z-index:-1;clip:auto;overflow:visible}.wp-block-openstudios-three-d-text.is-preview .wp-block-openstudios-three-d-text__canvas{display:block}.entry-content>.wp-block-openstudios-three-d-text,.wp-block-post-content>.wp-block-openstudios-three-d-text{margin-left:max(0px,(100% - min(100%,var(--wp--style--global--content-size,840px)))/2);margin-right:auto;max-width:min(100%,var(--wp--style--global--content-size,840px))}

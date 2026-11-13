@@ -4,7 +4,7 @@ WordPress block plugin that adds a **3D Text** option to the Gutenberg Transform
 
 ## Status
 
-Version `0.1.0` scaffolds a publishable plugin shell and a passthrough text block with transforms. Real 3D rendering comes in later layers.
+Version `0.2.0` adds Three.js (`0.187`) extruded text: edit vs preview in the block toolbar, and the same scene on the front end via `viewScript`.
 
 ## Requirements
 

@@ -4,7 +4,7 @@ Contributors: openstudios
 Tags: 3d, text, gutenberg, block, editor
 Requires at least: 6.5
 Tested up to: 7.0
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -20,6 +20,8 @@ This initial release scaffolds the block and transform path. Richer 3D presentat
 == Features ==
 
 * 3D Text block in the block editor
+* Edit text or preview extruded Three.js output from the block toolbar
+* Front-end Three.js rendering of the same text
 * Transform from Paragraph or Heading
 * Transform back to Paragraph
 * Custom block icon in Transform To and the inserter
@@ -49,10 +51,17 @@ Paragraph and Heading.
 
 == Changelog ==
 
+= 0.2.0 =
+* Three.js extruded text on the front end
+* Editor edit / preview modes for the 3D Text block
+
 = 0.1.0 =
 * Initial scaffold: plugin shell and 3D Text block with Transform To support
 
 == Upgrade Notice ==
+
+= 0.2.0 =
+Adds Three.js preview and front-end rendering.
 
 = 0.1.0 =
 Initial release.

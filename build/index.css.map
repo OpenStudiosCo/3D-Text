@@ -1,1 +1,0 @@
-{"version":3,"file":"index.css","mappings":";;;AAAA;EACC;EACA;AACD,C","sources":["webpack://openstudios-3d-text/./src/editor.scss"],"sourcesContent":[".wp-block-openstudios-three-d-text {\n\t/* Editor chrome for the passthrough scaffold; 3D styling comes later. */\n\tmin-height: 1.5em;\n}\n"],"names":[],"sourceRoot":""}

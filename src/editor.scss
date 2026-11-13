@@ -1,4 +1,57 @@
+/*
+ * Hug glyph width. Top-level blocks align to the content column's left edge
+ * (same inset as a normal centred max-width block) instead of margin:auto centring
+ * or margin-left:0 which escapes under the sidebars.
+ */
 .wp-block-openstudios-three-d-text {
-	/* Editor chrome for the passthrough scaffold; 3D styling comes later. */
+	box-sizing: border-box;
+	width: fit-content;
+	max-width: 100%;
 	min-height: 1.5em;
+	margin-left: 0;
+	margin-right: auto;
+}
+
+.editor-styles-wrapper
+	.is-root-container
+	> .wp-block.wp-block-openstudios-three-d-text {
+	width: fit-content !important;
+	max-width: min( 100%, var( --wp--style--global--content-size, 840px ) );
+	margin-left: max(
+		0px,
+		calc(
+			(
+					100% -
+						min( 100%, var( --wp--style--global--content-size, 840px ) )
+				) /
+				2
+		)
+	) !important;
+	margin-right: auto !important;
+}
+
+.wp-block-openstudios-three-d-text {
+	&__measure {
+		position: absolute;
+		left: 0;
+		top: 0;
+		opacity: 0;
+		pointer-events: none;
+		white-space: nowrap;
+		z-index: -1;
+	}
+
+	&__preview {
+		display: block;
+		width: fit-content;
+		max-width: 100%;
+		line-height: 0;
+		background: transparent;
+		overflow: visible;
+
+		canvas {
+			display: block;
+			background: transparent;
+		}
+	}
 }

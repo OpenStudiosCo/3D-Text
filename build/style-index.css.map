@@ -1,1 +1,0 @@
-{"version":3,"file":"./style-index.css","mappings":";;;AAAA;EACC;AACD,C","sources":["webpack://openstudios-3d-text/./src/style.scss"],"sourcesContent":[".wp-block-openstudios-three-d-text {\n\t/* Front-end hook for future 3D presentation layers. */\n}\n"],"names":[],"sourceRoot":""}
