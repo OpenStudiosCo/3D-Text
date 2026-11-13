@@ -1,7 +1,7 @@
 import { useEffect, useRef } from '@wordpress/element';
-import { createTextScene } from './createTextScene';
-import { resolveFontUrl } from '../config';
-import { settingsFromAttributes } from '../settings';
+import { TextScene } from '../../../scene/text-scene';
+import { resolveFontUrl } from '../../../type/fonts';
+import { settingsFromAttributes } from '../../../type/settings';
 
 /**
  * Resolve the real text node used for type / spacing metrics.
@@ -29,7 +29,7 @@ function resolveReference( measureRef ) {
  * @param {import('react').RefObject<HTMLElement|null>} props.measureRef
  * @return {JSX.Element}
  */
-export default function PreviewCanvas( { html, attributes, measureRef } ) {
+export default function Preview( { html, attributes, measureRef } ) {
 	const hostRef = useRef( null );
 	const sceneRef = useRef( null );
 	const htmlRef = useRef( html );
@@ -56,7 +56,7 @@ export default function PreviewCanvas( { html, attributes, measureRef } ) {
 			attributesRef.current
 		);
 
-		createTextScene( host, {
+		TextScene.mount( host, {
 			fontUrl: resolveFontUrl(
 				initialSettings.fontFamily,
 				initialSettings.fontWeight

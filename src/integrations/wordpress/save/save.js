@@ -1,10 +1,10 @@
 import { useBlockProps, RichText } from '@wordpress/block-editor';
-import { toPlainText } from './three/plainText';
-import { contentTag } from './contentTag';
+import { toPlainText } from '../../../type/plain-text';
+import { contentTag } from '../../../type/content-tag';
 import {
 	settingsFromAttributes,
 	settingsToDataset,
-} from './settings';
+} from '../../../type/settings';
 
 /**
  * Saved markup: accessible text fallback plus a mount point for viewScript.

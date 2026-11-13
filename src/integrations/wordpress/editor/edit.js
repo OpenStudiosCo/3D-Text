@@ -6,9 +6,9 @@ import {
 	BlockControls,
 } from '@wordpress/block-editor';
 import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
-import PreviewCanvas from './three/PreviewCanvas';
+import Preview from './preview';
 import Inspector from './inspector';
-import { contentTag } from './contentTag';
+import { contentTag } from '../../../type/content-tag';
 import './editor.scss';
 
 const editIcon = (
@@ -94,7 +94,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					/>
 				</div>
 				{ mode === 'preview' && (
-					<PreviewCanvas
+					<Preview
 						html={ content }
 						attributes={ attributes }
 						measureRef={ measureRef }
