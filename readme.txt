@@ -4,7 +4,7 @@ Contributors: openstudios
 Tags: 3d, text, gutenberg, block, editor
 Requires at least: 6.5
 Tested up to: 7.0
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -51,6 +51,10 @@ Paragraph and Heading.
 
 == Changelog ==
 
+= 0.3.0 =
+* Sidebar controls for rotation, offset, extrusion, typeface, colour and shininess
+* Canvas refits when posed bounds change
+
 = 0.2.0 =
 * Three.js extruded text on the front end
 * Editor edit / preview modes for the 3D Text block
@@ -59,6 +63,9 @@ Paragraph and Heading.
 * Initial scaffold: plugin shell and 3D Text block with Transform To support
 
 == Upgrade Notice ==
+
+= 0.3.0 =
+Adds inspector controls for 3D pose, typeface and appearance.
 
 = 0.2.0 =
 Adds Three.js preview and front-end rendering.

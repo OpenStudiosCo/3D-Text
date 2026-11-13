@@ -1,5 +1,7 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { createTextScene } from './createTextScene';
+import { resolveFontUrl } from '../config';
+import { settingsFromAttributes } from '../settings';
 
 /**
  * Resolve the real text node used for type / spacing metrics.
@@ -23,15 +25,23 @@ function resolveReference( measureRef ) {
  *
  * @param {Object} props
  * @param {string} props.html
- * @param {string} props.fontUrl
+ * @param {Object} props.attributes
  * @param {import('react').RefObject<HTMLElement|null>} props.measureRef
  * @return {JSX.Element}
  */
-export default function PreviewCanvas( { html, fontUrl, measureRef } ) {
+export default function PreviewCanvas( { html, attributes, measureRef } ) {
 	const hostRef = useRef( null );
 	const sceneRef = useRef( null );
 	const htmlRef = useRef( html );
+	const attributesRef = useRef( attributes );
 	htmlRef.current = html;
+	attributesRef.current = attributes;
+
+	const settings = settingsFromAttributes( attributes );
+	const fontUrl = resolveFontUrl(
+		settings.fontFamily,
+		settings.fontWeight
+	);
 
 	useEffect( () => {
 		const host = hostRef.current;
@@ -40,12 +50,20 @@ export default function PreviewCanvas( { html, fontUrl, measureRef } ) {
 		}
 
 		let cancelled = false;
-		const referenceEl = resolveReference( measureRef ) || host.parentElement;
+		const referenceEl =
+			resolveReference( measureRef ) || host.parentElement;
+		const initialSettings = settingsFromAttributes(
+			attributesRef.current
+		);
 
 		createTextScene( host, {
-			fontUrl,
+			fontUrl: resolveFontUrl(
+				initialSettings.fontFamily,
+				initialSettings.fontWeight
+			),
 			initialHtml: htmlRef.current,
 			referenceEl,
+			settings: initialSettings,
 		} )
 			.then( ( scene ) => {
 				if ( cancelled ) {
@@ -53,6 +71,13 @@ export default function PreviewCanvas( { html, fontUrl, measureRef } ) {
 					return;
 				}
 				sceneRef.current = scene;
+				// Apply whatever the sidebar has now (mount is async).
+				const latest = settingsFromAttributes( attributesRef.current );
+				scene.setSettings(
+					latest,
+					resolveFontUrl( latest.fontFamily, latest.fontWeight )
+				);
+				scene.update( htmlRef.current );
 			} )
 			.catch( () => {
 				// Font or WebGL failure — leave the empty host; edit mode still works.
@@ -65,13 +90,24 @@ export default function PreviewCanvas( { html, fontUrl, measureRef } ) {
 				sceneRef.current = null;
 			}
 		};
-	}, [ fontUrl, measureRef ] );
+		// Mount once per preview session; settings flow through setSettings below.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ measureRef ] );
 
 	useEffect( () => {
 		if ( sceneRef.current ) {
 			sceneRef.current.update( html );
 		}
 	}, [ html ] );
+
+	useEffect( () => {
+		if ( ! sceneRef.current ) {
+			return;
+		}
+		const next = settingsFromAttributes( attributes );
+		const nextFont = resolveFontUrl( next.fontFamily, next.fontWeight );
+		sceneRef.current.setSettings( next, nextFont );
+	}, [ attributes ] );
 
 	return (
 		<div

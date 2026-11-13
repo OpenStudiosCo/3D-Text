@@ -30,9 +30,11 @@ Do not impose Media Library, AJAX, or script-module patterns from sibling plugin
 - `src/block.json` — block metadata (`viewScript` for front-end Three.js).
 - `src/index.js` — `registerBlockType`, icon, transforms.
 - `src/edit.js` — edit vs preview modes (toolbar); RichText or `PreviewCanvas`.
+- `src/inspector.js` — sidebar Transform / Typeface / Extrusion / Appearance controls.
+- `src/settings.js` — attribute ↔ scene settings ↔ `data-os3dt-*` helpers.
 - `src/save.js` / `src/view.js` — saved markup and front-end mount.
 - `src/three/` — `createTextScene`, `PreviewCanvas`, plain-text helper.
-- `assets/fonts/` — typeface JSON for `TextGeometry` (not shipped inside the `three` npm package).
+- `assets/fonts/` — typeface JSON for `TextGeometry` (helvetiker / optimer / gentilis × regular / bold).
 - `assets/` — WordPress.org icons (and screenshots when available).
 - `languages/` — translation template(s).
 
@@ -42,6 +44,8 @@ Mode is **local React state**, not a block attribute: it must not dirty the post
 
 - **Edit** — RichText visible; Three.js canvas unmounted.
 - **Preview** — RichText hidden; Three.js preview matches front-end behaviour.
+
+Pose, typeface, extrusion, colour and shininess **are** block attributes and persist via `data-os3dt-*` on save.
 
 ## Transforms
 

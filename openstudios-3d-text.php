@@ -3,7 +3,7 @@
 /**
  * Plugin Name:  Open Studios 3D Text
  * Description:  Turn selected text into a 3D Text block in the WordPress block editor.
- * Version:      0.2.0
+ * Version:      0.3.0
  * Author:       Open Studios
  * Author URI:   https://openstudios.xyz
  * Text Domain:  openstudios-3d-text
@@ -15,6 +15,29 @@
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/**
+ * Build the typeface URL map shipped with the plugin.
+ *
+ * @return array<string, array<string, string>>
+ */
+function os3dt_font_map() {
+	$families = array( 'helvetiker', 'optimer', 'gentilis' );
+	$weights  = array( 'regular', 'bold' );
+	$fonts    = array();
+
+	foreach ( $families as $family ) {
+		$fonts[ $family ] = array();
+		foreach ( $weights as $weight ) {
+			$fonts[ $family ][ $weight ] = plugins_url(
+				"assets/fonts/{$family}_{$weight}.typeface.json",
+				__FILE__
+			);
+		}
+	}
+
+	return $fonts;
 }
 
 /**
@@ -35,10 +58,7 @@ function os3dt_register_block() {
 
 	$data = wp_json_encode(
 		array(
-			'fontUrl'    => plugins_url(
-				'assets/fonts/helvetiker_regular.typeface.json',
-				__FILE__
-			),
+			'fonts'      => os3dt_font_map(),
 			'publicPath' => plugins_url( 'build/', __FILE__ ),
 		)
 	);

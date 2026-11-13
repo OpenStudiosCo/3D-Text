@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "openstudios/three-d-text",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "title": "3D Text",
   "category": "text",
   "icon": "text",
@@ -20,6 +20,50 @@
     "level": {
       "type": "number",
       "default": 0
+    },
+    "rotateX": {
+      "type": "number",
+      "default": -6
+    },
+    "rotateY": {
+      "type": "number",
+      "default": 16
+    },
+    "rotateZ": {
+      "type": "number",
+      "default": 0
+    },
+    "offsetX": {
+      "type": "number",
+      "default": 0
+    },
+    "offsetY": {
+      "type": "number",
+      "default": 0
+    },
+    "depth": {
+      "type": "number",
+      "default": 0.08
+    },
+    "bevel": {
+      "type": "number",
+      "default": 0
+    },
+    "fontFamily": {
+      "type": "string",
+      "default": "helvetiker"
+    },
+    "fontWeight": {
+      "type": "string",
+      "default": "regular"
+    },
+    "textColor": {
+      "type": "string",
+      "default": ""
+    },
+    "shiny": {
+      "type": "boolean",
+      "default": false
     }
   },
   "supports": {

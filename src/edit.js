@@ -7,7 +7,7 @@ import {
 } from '@wordpress/block-editor';
 import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
 import PreviewCanvas from './three/PreviewCanvas';
-import { getConfig } from './config';
+import Inspector from './inspector';
 import { contentTag } from './contentTag';
 import './editor.scss';
 
@@ -28,8 +28,6 @@ const previewIcon = (
  *
  * @param {Object}   props
  * @param {Object}   props.attributes
- * @param {string}   props.attributes.content
- * @param {number}   props.attributes.level
  * @param {Function} props.setAttributes
  * @return {JSX.Element}
  */
@@ -37,7 +35,6 @@ export default function Edit( { attributes, setAttributes } ) {
 	const { content, level } = attributes;
 	const [ mode, setMode ] = useState( 'edit' );
 	const measureRef = useRef( null );
-	const { fontUrl } = getConfig();
 	const tagName = contentTag( level );
 	const blockProps = useBlockProps( {
 		className:
@@ -47,6 +44,10 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	return (
 		<>
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+			/>
 			<BlockControls>
 				<ToolbarGroup>
 					<ToolbarButton
@@ -95,7 +96,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				{ mode === 'preview' && (
 					<PreviewCanvas
 						html={ content }
-						fontUrl={ fontUrl }
+						attributes={ attributes }
 						measureRef={ measureRef }
 					/>
 				) }

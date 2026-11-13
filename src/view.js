@@ -1,15 +1,11 @@
 import { createTextScene } from './three/createTextScene';
-import { getConfig } from './config';
+import { resolveFontUrl } from './config';
+import { settingsFromDataset } from './settings';
 
 /**
  * Front-end: replace each block's fallback text with a live Three.js preview.
  */
 function mountBlocks() {
-	const { fontUrl } = getConfig();
-	if ( ! fontUrl ) {
-		return;
-	}
-
 	const blocks = document.querySelectorAll(
 		'.wp-block-openstudios-three-d-text:not([data-os3dt-mounted])'
 	);
@@ -25,6 +21,15 @@ function mountBlocks() {
 			return;
 		}
 
+		const settings = settingsFromDataset( block );
+		const fontUrl = resolveFontUrl(
+			settings.fontFamily,
+			settings.fontWeight
+		);
+		if ( ! fontUrl ) {
+			return;
+		}
+
 		const html =
 			content?.innerHTML ||
 			block.getAttribute( 'data-os3dt-text' ) ||
@@ -33,11 +38,11 @@ function mountBlocks() {
 		block.dataset.os3dtMounted = 'true';
 		block.classList.add( 'is-preview' );
 
-		// Measure the real text node before / while it is visually hidden.
 		createTextScene( canvas, {
 			fontUrl,
 			initialHtml: html,
 			referenceEl: content || block,
+			settings,
 		} ).catch( () => {
 			block.classList.remove( 'is-preview' );
 			delete block.dataset.os3dtMounted;

@@ -2,19 +2,21 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { toPlainText } from './plainText';
+import { DEFAULT_SETTINGS, needsGeometryRebuild } from '../settings';
 
 /** Extra room around glyphs so bevel/pose is not clipped. */
 const FRAME_MARGIN = 1.08;
 
+const DEG = Math.PI / 180;
+
 /**
  * @typedef {Object} TextSceneHandle
  * @property {(html: string) => void} update
+ * @property {(next: Object) => Promise<void>} setSettings
  * @property {() => void} dispose
  */
 
 /**
- * Content column width — never the fit-content block itself (that causes a shrink loop).
- *
  * @param {HTMLElement} container
  * @return {number}
  */
@@ -29,8 +31,6 @@ function getColumnMaxWidth( container ) {
 }
 
 /**
- * Read type and box metrics from the original text element (heading or paragraph).
- *
  * @param {HTMLElement} container
  * @param {HTMLElement} [referenceEl]
  */
@@ -57,9 +57,6 @@ function measureType( container, referenceEl ) {
 }
 
 /**
- * Match vertical rhythm from the reference text; stay left within the block.
- * Do not touch horizontal margins — Gutenberg owns those on `.wp-block`.
- *
  * @param {HTMLElement} container
  * @param {ReturnType<typeof measureType>} type
  */
@@ -80,6 +77,28 @@ function applyInheritedBox( container, type ) {
 }
 
 /**
+ * @param {boolean} shiny
+ * @return {{ metalness: number, roughness: number }}
+ */
+function materialFinish( shiny ) {
+	return shiny
+		? { metalness: 0.85, roughness: 0.2 }
+		: { metalness: 0.05, roughness: 0.65 };
+}
+
+/**
+ * Load a typeface via FontLoader.
+ *
+ * @param {string} fontUrl
+ * @return {Promise<import('three/addons/loaders/FontLoader.js').Font>}
+ */
+function loadFont( fontUrl ) {
+	return new Promise( ( resolve, reject ) => {
+		new FontLoader().load( fontUrl, resolve, undefined, reject );
+	} );
+}
+
+/**
  * Mount a Three.js scene that extrudes plain text at roughly the original type size.
  *
  * @param {HTMLElement} container
@@ -87,14 +106,20 @@ function applyInheritedBox( container, type ) {
  * @param {string}      options.fontUrl
  * @param {string}      [options.initialHtml]
  * @param {HTMLElement} [options.referenceEl]
+ * @param {Object}      [options.settings]
  * @return {Promise<TextSceneHandle>}
  */
 export async function createTextScene(
 	container,
-	{ fontUrl, initialHtml = '', referenceEl }
+	{ fontUrl, initialHtml = '', referenceEl, settings: initialSettings = {} }
 ) {
 	const type = measureType( container, referenceEl );
 	applyInheritedBox( container, type );
+
+	let settings = { ...DEFAULT_SETTINGS, ...initialSettings };
+	let currentFontUrl = fontUrl;
+	let font = await loadFont( currentFontUrl );
+	let html = initialHtml;
 
 	const scene = new THREE.Scene();
 	scene.background = null;
@@ -121,13 +146,7 @@ export async function createTextScene(
 	scene.add( fill );
 
 	const root = new THREE.Group();
-	// Fixed pose so extrusion reads as 3D without motion.
-	root.rotation.set( -0.1, 0.28, 0 );
 	scene.add( root );
-
-	const font = await new Promise( ( resolve, reject ) => {
-		new FontLoader().load( fontUrl, resolve, undefined, reject );
-	} );
 
 	let mesh = null;
 	let disposed = false;
@@ -138,17 +157,41 @@ export async function createTextScene(
 		}
 	};
 
+	const applyPose = () => {
+		root.rotation.set(
+			settings.rotateX * DEG,
+			settings.rotateY * DEG,
+			settings.rotateZ * DEG
+		);
+		if ( mesh ) {
+			mesh.position.set( settings.offsetX, settings.offsetY, 0 );
+		}
+	};
+
+	const applyAppearance = () => {
+		if ( ! mesh ) {
+			return;
+		}
+		const colour = settings.textColor || type.color;
+		mesh.material.color.set( colour );
+		const finish = materialFinish( settings.shiny );
+		mesh.material.metalness = finish.metalness;
+		mesh.material.roughness = finish.roughness;
+		mesh.material.needsUpdate = true;
+	};
+
 	/**
-	 * Size the canvas to the glyph bounds. Only shrink if wider than the content column.
+	 * Size the canvas from the posed bounds. Only shrink if wider than the content column.
 	 */
 	const fitToText = () => {
 		if ( ! mesh ) {
 			return;
 		}
 
-		mesh.scale.set( 1, 1, 1 );
-		mesh.updateWorldMatrix( true, false );
-		const box = new THREE.Box3().setFromObject( mesh );
+		const baseScale = mesh.userData.baseScale || 1;
+		mesh.scale.setScalar( baseScale );
+		root.updateWorldMatrix( true, true );
+		const box = new THREE.Box3().setFromObject( root );
 		const size = box.getSize( new THREE.Vector3() );
 
 		let w = Math.max( Math.ceil( size.x * FRAME_MARGIN ), 1 );
@@ -159,7 +202,7 @@ export async function createTextScene(
 			const s = maxW / w;
 			w = maxW;
 			h = Math.max( Math.ceil( h * s ), 1 );
-			mesh.scale.setScalar( s );
+			mesh.scale.setScalar( baseScale * s );
 		}
 
 		container.style.width = `${ w }px`;
@@ -174,48 +217,53 @@ export async function createTextScene(
 		camera.lookAt( 0, 0, 0 );
 	};
 
-	const rebuild = ( html ) => {
+	const rebuildGeometry = () => {
 		const text = toPlainText( html ) || '3D Text';
 
 		if ( mesh ) {
 			root.remove( mesh );
 			mesh.geometry.dispose();
-			if ( Array.isArray( mesh.material ) ) {
-				mesh.material.forEach( ( m ) => m.dispose() );
-			} else {
-				mesh.material.dispose();
-			}
+			mesh.material.dispose();
 			mesh = null;
 		}
+
+		const depth = Math.max( type.fontSize * settings.depth, 0.5 );
+		const bevelEnabled = settings.bevel > 0;
+		const bevelSize = bevelEnabled
+			? Math.max( type.fontSize * settings.bevel, 0.15 )
+			: 0;
 
 		const geometry = new TextGeometry( text, {
 			font,
 			size: type.fontSize,
-			depth: Math.max( type.fontSize * 0.2, 2 ),
+			depth,
 			curveSegments: 6,
-			bevelEnabled: true,
-			bevelThickness: Math.max( type.fontSize * 0.035, 0.35 ),
-			bevelSize: Math.max( type.fontSize * 0.025, 0.25 ),
+			bevelEnabled,
+			bevelThickness: bevelSize,
+			bevelSize: bevelSize * 0.75,
 			bevelOffset: 0,
-			bevelSegments: 2,
+			bevelSegments: bevelEnabled ? 2 : 0,
 		} );
 		geometry.computeBoundingBox();
 		geometry.center();
 
+		const finish = materialFinish( settings.shiny );
 		const material = new THREE.MeshStandardMaterial( {
-			color: new THREE.Color( type.color ),
-			metalness: 0.12,
-			roughness: 0.5,
+			color: new THREE.Color( settings.textColor || type.color ),
+			metalness: finish.metalness,
+			roughness: finish.roughness,
 		} );
 
 		mesh = new THREE.Mesh( geometry, material );
+		mesh.userData.baseScale = 1;
 		root.add( mesh );
 
+		applyPose();
 		fitToText();
 		paint();
 	};
 
-	rebuild( initialHtml );
+	rebuildGeometry();
 
 	const onResize = () => {
 		fitToText();
@@ -230,7 +278,36 @@ export async function createTextScene(
 	resizeObserver.observe( column );
 
 	return {
-		update: rebuild,
+		update( nextHtml ) {
+			html = nextHtml;
+			rebuildGeometry();
+		},
+
+		async setSettings( nextSettings, nextFontUrl ) {
+			const previous = settings;
+			settings = { ...DEFAULT_SETTINGS, ...nextSettings };
+
+			const fontChanged =
+				nextFontUrl && nextFontUrl !== currentFontUrl;
+			const rebuild =
+				fontChanged || needsGeometryRebuild( previous, settings );
+
+			if ( fontChanged ) {
+				currentFontUrl = nextFontUrl;
+				font = await loadFont( currentFontUrl );
+			}
+
+			if ( rebuild ) {
+				rebuildGeometry();
+				return;
+			}
+
+			applyPose();
+			applyAppearance();
+			fitToText();
+			paint();
+		},
+
 		dispose() {
 			disposed = true;
 			resizeObserver.disconnect();
